@@ -2,6 +2,12 @@
 #include <dht_handler.h>
 #include <lcd_handler.h>
 
+#define BEFORE_BUTTON_PIN 5
+#define AFTER_BUTTON_PIN 6
+
+bool beforeButton = false;
+bool afterButton = false;
+
 void setup()
 {
     Serial.begin(9600);
@@ -11,15 +17,27 @@ void setup()
     initDHT();
     initLCD();
 
-    printLCD("Booting up...", "Please wait...");
+    printLCD("Booting up...", "Please wait...", 0);
 }
 
+// TODO counter
 void loop()
 {
-    printDHTInfoWithTick(1000);
-    printLCD(
-        String("Humi: " + String(humid) + "%").c_str(),
-        String("Temp: " + String(temp, 1) + "'C").c_str(),
-        1000
-    );
+    tickDHT();
+    delay(2000);
+
+    // button handling
+    if (digitalRead(BEFORE_BUTTON_PIN) != 0x1) beforeButton = false;
+    else beforeButton = true;
+
+    if (digitalRead(AFTER_BUTTON_PIN) != 0x1) afterButton = false;
+    else afterButton = true;
+
+
+    if (beforeButton) page--;
+    if (afterButton) page++;
+    
+    updatePage();
+
+    delay(50);
 }
